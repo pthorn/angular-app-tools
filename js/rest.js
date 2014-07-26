@@ -6,7 +6,7 @@
 
 (function() {
 
-    var m_rest = angular.module('rest', ['notification']);
+    var m_rest = angular.module('rest', []);
 
     var Rest = function($q, $http) {
 
