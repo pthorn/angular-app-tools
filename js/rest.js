@@ -17,9 +17,9 @@
                 url_prefix:        '/rest/',    // could be '//rest.me.com/api/'
                 on_invalid:         null,
                 on_rest_error:      null,       // when not {status: 'ok'}
-                on_http_error_502:  null,       // when
-                on_http_error_503:  null,       // when
-                on_http_error:      null        // http status is 4xx or 5xx but not 502 or 503
+                on_http_error_401:  null,       // when
+                on_http_error_403:  null,       // when
+                on_http_error:      null        // http status is 4xx or 5xx but not 401 or 403
             }, config_ || {});
 
             if(config.url_prefix.indexOf('/', this.length-1) === -1) {
@@ -66,11 +66,11 @@
                 })
                 .error(function(data, status, headers, config_) {
                     var handlers = {
-                        502: config.on_http_error_502,
-                        503: config.on_http_error_503,
+                        401: config.on_http_error_401,
+                        403: config.on_http_error_403,
                         0:   config.on_http_error
                     };
-                    var code = (status < 502 || status > 503) ? 0 : status;
+                    var code = handlers[status] ? status : 0;
                     handlers[code] && handlers[code](data, status, headers, config_);
                     deferred.reject(data);
                 });
@@ -207,11 +207,11 @@
             on_http_error: function (data, status, headers, config) {
                 console.warn('http error:', 'data', data, 'status', status, 'headers', headers, 'config', config);
             },
-            on_http_error_502: function (data, status, headers, config) {
-                console.warn('http 502', 'data', data, 'status', status, 'headers', headers, 'config', config);
+            on_http_error_401: function (data, status, headers, config) {
+                console.warn('http 401', 'data', data, 'status', status, 'headers', headers, 'config', config);
             },
-            on_http_error_503: function (data, status, headers, config) {
-                console.warn('http 503:', 'data', data, 'status', status, 'headers', headers, 'config', config);
+            on_http_error_403: function (data, status, headers, config) {
+                console.warn('http 403:', 'data', data, 'status', status, 'headers', headers, 'config', config);
             }
         });
       });
