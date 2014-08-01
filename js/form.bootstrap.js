@@ -12,8 +12,9 @@
     m_form_bootstrap.directive('fChosen', function() {
         return {
             restrict: 'A',
+            require: 'ngModel',
 
-            link: function(scope, element, attrs) {
+            link: function(scope, element, attrs, model_ctrl) {
 
                 // TODO configurable
                 element.chosen({
@@ -22,11 +23,16 @@
                     no_results_text: 'Нет совпадений'
                 });
 
+                model_ctrl.$render = function() {
+                    setTimeout(function() {
+                        element.trigger('chosen:updated');
+                    }, 0);
+                };
+
+                // update chosen when options change
                 var re = /in +(\w+)/;  // "i.id as i.name for i in clients" -> "clients"
                 var expr_to_watch = attrs.ngOptions.match(re)[1];
-                scope.$watch(expr_to_watch, function() {
-                    element.trigger('chosen:updated');
-                });
+                scope.$watch(expr_to_watch, model_ctrl.$render);
             }
         };
     });
