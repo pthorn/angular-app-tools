@@ -28,16 +28,16 @@ div.aat-image-list {
                 background: rgba(0, 0, 0, 0.5);
             }
 
-                div.aat-image-list li > div span.glyphicon-remove {
+                div.aat-image-list li > div span.glyphicon {
                     float: right;
-                    margin: 6px 6px 0 0;
-                    font-size: 18px;
+                    margin: 8px 10px 0 0;
+                    font-size: 16px;
                     color: white;
                     cursor: pointer;
                 }
 
-                    div.aat-image-list li > div span.glyphicon-remove:hover,
-                    div.aat-image-list li > div span.glyphicon-remove:active,
+                    div.aat-image-list li > div a:hover span.glyphicon,
+                    div.aat-image-list li > div a:active span.glyphicon
                     {
-                        color: red;
+                        color: #f88;
                     }

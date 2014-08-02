@@ -150,7 +150,14 @@
   <ul>\
     <li ng-repeat="img in images">\
       <img ng-src="{{thumb_src(img)}}">\
-      <div><span class="glyphicon glyphicon-remove" ng-click="del(img)"></span></div>\
+      <div>\
+        <a ng-click="del(img)" title="Удалить">\
+          <span class="glyphicon glyphicon-remove"></span>\
+        </a>\
+        <a ng-click="open(img)" title="Открыть оригинал">\
+          <span class="glyphicon glyphicon-new-window"></span>\
+        </a>\
+      </div>\
       <p>{{img.caption}}</p>\
     </li>\
   </ul>\
@@ -169,7 +176,10 @@
 
                 scope.options = $.extend({
                     url_prefix: '',
-                    get_filename: function(img) {
+                    get_orig_filename: function(img) {
+                        return img.id + '.' +img.ext;
+                    },
+                    get_thumb_filename: function(img) {
                         return img.id + '-thumb.' +img.ext;
                     },
                     upload_url: '',
@@ -180,11 +190,15 @@
 
                 scope.thumb_src = function(img) {
                     // TODO ensure slash between prefix & filename
-                    return scope.options.url_prefix + scope.options.get_filename(img);
+                    return scope.options.url_prefix + scope.options.get_thumb_filename(img);
                 };
 
                 scope.del = function(img) {
                     controller.del(img.id);
+                };
+
+                scope.open = function(img) {
+                    window.open(scope.options.url_prefix + scope.options.get_orig_filename(img), '_blank');
                 };
 
                 var file_input = element.find('input[type="file"]');
