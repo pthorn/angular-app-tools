@@ -1,0 +1,50 @@
+
+div.aat-grid {
+
+}
+
+    div.aat-grid table.table {
+        margin-bottom: 0;
+        max-width: none;
+    }
+
+        div.aat-grid thead th.order {
+            position: relative;
+            cursor: pointer;
+        }
+
+            div.aat-grid thead th.order.disabled {
+                cursor: inherit;
+            }
+
+        div.aat-grid thead th.order:after {
+            content: "";
+            position: absolute;
+            top: 3px;
+            right: 1px;
+            width: 19px;
+            height: 19px;
+            background-image: url("../images/grid-sprite.png");
+            background-repeat: no-repeat;
+        }
+
+        div.aat-grid thead th.enabled:after {
+            background-position: 0 -38px;
+        }
+
+        div.aat-grid thead th.asc:after {
+            background-position: 0 0;
+        }
+
+        div.aat-grid thead th.desc:after {
+            background-position: 0 -19px;
+        }
+
+        div.aat-grid thead th.disabled:after {
+            background-position: 0 -100px;
+            cursor: inherit;
+        }
+
+    div.aat-grid ul.pagination a {
+        cursor: pointer;
+    }

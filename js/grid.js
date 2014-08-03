@@ -78,7 +78,7 @@ see also
             scope: true,
 
             template: '\
-<div class="dataTables_wrapper form-inline no-footer"> \
+<div class="aat-grid"> \
     <div class="filters">\
         Фильтр:\
         <input class="search" type="text" ng-model="search" ng-show="search_enabled">\
@@ -89,7 +89,7 @@ see also
         </span>\
         <button class="filter-reset" ng-show="filters.length || search_enabled" ng-click="filter_reset()"><div></div></button>\
     </div>\
-    <table class="table table-vcenter table-condensed table-bordered dataTable no-footer"> \
+    <table class="table table-condensed table-hover"> \
         <thead> \
             <tr> \
                 <th ng-repeat="col in columns" ng-click="col_header_click(col)" class="{{col_header_class(col)}}"> \
@@ -103,16 +103,26 @@ see also
             </tr> \
         </tbody> \
     </table> \
-    <div class="pager">\
+    <div class="page-nav">\
+        <ul class="pagination">\
+            <li ng-class="{disabled: current_page == 1}">\
+                <a class="first" ng-click="first_page_click()">&laquo;</a>\
+            </li>\
+            <li ng-class="{disabled: current_page == 1}">\
+                <a class="prev" ng-click="prev_page_click()">&lt;</a>\
+            </li>\
+            <li ng-repeat="page in pages" ng-class="{active: page == current_page}">\
+              <a ng-click="page_click(page)">{{page}}</a>\
+            </li>\
+            <li ng-class="{disabled: current_page == n_pages}">\
+                <a class="next" ng-click="next_page_click()">&gt;</a>\
+            </li>\
+            <li ng-class="{disabled: current_page == n_pages}">\
+                <a class="last" ng-click="last_page_click()">&raquo;</a>\
+            </li>\
+        </ul>\
         <span ng-show="n_rows > 0">\
             Страница {{current_page}}/{{n_pages}}, строки {{first_row}}/{{last_row}} из {{n_rows}}\
-            <a class="first" ng-click="first_page_click()" ng-class="current_page != 1 ? \'\' : \'disabled\'"></a>\
-            <a class="prev" ng-click="prev_page_click()" ng-class="current_page != 1 ? \'\' : \'disabled\'"></a>\
-            <ul>\
-                <li ng-repeat="page in pages" ng-click="page_click(page)" ng-class="page == current_page ? \'current\' : \'\'">{{page}}</li>\
-            </ul>\
-            <a class="next" ng-click="next_page_click()" ng-class="current_page != n_pages ? \'\' : \'disabled\'"></a>\
-            <a class="last" ng-click="last_page_click()" ng-class="current_page != n_pages ? \'\' : \'disabled\'"></a>\
         </span>\
         <span ng-show="n_rows == 0">\
             Нет данных.\
@@ -131,6 +141,11 @@ see also
                     rows_per_page: 15,
                     order_col: 'id',
                     order_dir: 'asc',
+                    order_class: 'order',
+                    order_enabled_class: 'enabled',
+                    order_disabled_class: 'disabled',
+                    order_asc_class: 'asc',
+                    order_desc_class: 'desc',
                     search_enabled: true,
                     filters: []
                 }, $scope.$eval(iAttrs.options));
@@ -259,13 +274,15 @@ see also
                 $scope.col_header_class = function(col) {
                     var key = col.sort_key || col.key;
 
+                    var cls = options.order_class + ' ';
+
                     if(!key)
-                        return 'sorting_disabled';
+                        return cls + options.order_disabled_class;
 
                     if(key == $scope.order_col) {
-                        return $scope.order_dir == 'asc' ? 'sorting_asc' : 'sorting_desc';
+                        return cls + ($scope.order_dir == 'asc' ? options.order_asc_class : options.order_desc_class);
                     } else {
-                        return 'sorting';
+                        return cls + options.order_enabled_class;
                     }
                 };
 
