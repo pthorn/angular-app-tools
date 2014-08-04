@@ -142,16 +142,21 @@
                     if (this.mode == 'new') {
                         rest.add(entity, obj_to_submit).then(function (data) {
                             notification.add(null, 'Объект создан', 'success');
-                            if (config.after_submit) {
-                                config.after_submit.call($this, data.id, $this.mode);
+
+                            if($this.config.after_submit.length) {
+                                $.each($this.config.after_submit, function (k, v) {
+                                    v.call($this, data);
+                                });
                             } else {
                                 // show the edit form (possibly with detail view)
+                                // TODO global config
                                 $location.path('/' + entity + '/' + data.id);
                             }
                         }, handle_server_errors);
                     } else {
                         rest.update_by_id(entity, this.id, obj_to_submit).then(function (data) {
                             notification.add(null, 'Объект сохранен', 'success');
+
                             $.each($this.config.after_submit, function (k, v) {
                                 v.call($this);
                             });
