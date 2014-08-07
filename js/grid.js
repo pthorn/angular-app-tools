@@ -137,15 +137,45 @@ see also
         </div>\
     </div>\
 </div>',
+            
+            controller: function($scope) {
 
-            link: function($scope, iElement, iAttrs, controller) {
+                var options = null;
+
+                this._set_options = function(options_) {
+                    options = options_;
+                };
+
+                // TODO use loading & error to indicate to user
+                this.load = function() {
+                    $scope.loading = true;
+                    rest.get_list(options.entity, {
+                        start: ($scope.current_page - 1) * options.rows_per_page,
+                        limit: options.rows_per_page,
+                        order: {dir: $scope.order_dir, col: $scope.order_col},
+                        search: $scope.search,
+                        filters: $scope.selected_filters
+                    }).then(function(data) {
+                        $scope.data = data.data;
+                        $scope.n_rows = parseInt(data.count);
+                        $scope.loading = false;
+                        $scope.error = false;
+                    }, function(data) {
+                        $scope.data = [];
+                        $scope.loading = false;
+                        $scope.error = true;
+                    });
+                };
+            },
+
+            link: function($scope, element, attrs, controller) {
 
                 //
                 // options
                 //
 
                 var options = $.extend({}, {
-                    fuck_with_scope: false,
+                    add_to_scope: null,
                     rows_per_page: 15,
                     order_col: 'id',
                     order_dir: 'asc',
@@ -156,7 +186,7 @@ see also
                     order_desc_class: 'desc',
                     search_enabled: true,
                     filters: []
-                }, $scope.$eval(iAttrs.options));
+                }, $scope.$eval(attrs.options));
 
                 $scope.columns = options.columns;
                 $.each($scope.columns, function(i, col_spec) {
@@ -166,6 +196,13 @@ see also
                     if(col_spec.key)
                         col_spec.key_split =  col_spec.key.split('.');
                 });
+
+                controller._set_options(options);
+
+                // place into scope
+                if(attrs.name) {
+                    $scope.$parent[attrs.name] = controller;
+                }
 
                 //
                 // pagination
@@ -203,58 +240,38 @@ see also
                     update_last_row();
                 });
 
-                var request = function() {   // TODO use loading & error to indicate to user
-                    $scope.loading = true;
-                    rest.get_list(options.entity, {
-                        start: ($scope.current_page - 1) * options.rows_per_page,
-                        limit: options.rows_per_page,
-                        order: {dir: $scope.order_dir, col: $scope.order_col},
-                        search: $scope.search,
-                        filters: $scope.selected_filters
-                    }).then(function(data) {
-                        $scope.data = data.data;
-                        $scope.n_rows = parseInt(data.count);
-                        $scope.loading = false;
-                        $scope.error = false;
-                    }, function(data) {
-                        $scope.data = [];
-                        $scope.loading = false;
-                        $scope.error = true;
-                    });
-                };
-
                 $scope.page_click = function(page_n) {
                     if($scope.current_page != page_n) {
                         $scope.current_page = page_n;
-                        request();
+                        controller.load();
                     }
                 };
 
                 $scope.first_page_click = function() {
                     if($scope.current_page > 1) {
                         $scope.current_page = 1;
-                        request();
+                        controller.load();
                     }
                 };
 
                 $scope.prev_page_click = function() {
                     if($scope.current_page > 1) {
                         $scope.current_page--;
-                        request();
+                        controller.load();
                     }
                 };
 
                 $scope.next_page_click = function() {
                     if($scope.current_page < $scope.n_pages) {
                         $scope.current_page++;
-                        request();
+                        controller.load();
                     }
                 };
 
                 $scope.last_page_click = function() {
                     if($scope.current_page < $scope.n_pages) {
                         $scope.current_page = $scope.n_pages;
-                        request();
+                        controller.load();
                     }
                 };
 
@@ -276,7 +293,7 @@ see also
                     }
 
                     $scope.current_page = 1;
-                    request();
+                    controller.load();
                 };
 
                 $scope.col_header_class = function(col) {
@@ -351,7 +368,7 @@ see also
                         }
                     });
                     $scope.current_page = 1;
-                    request();
+                    controller.load();
                 };
 
                 $scope.filter_reset = function() {
@@ -366,11 +383,11 @@ see also
                 // initialize
                 //
 
-                if(options.fuck_with_scope) {
-                    options.fuck_with_scope($scope);
+                if(options.add_to_scope) {
+                    options.add_to_scope($scope);
                 }
 
-                request();
+                controller.load();
             }
         };
     }]);
