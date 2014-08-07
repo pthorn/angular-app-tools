@@ -79,7 +79,7 @@
                     });
                 },
 
-                load_edit: function (id) {
+                load_edit: function(id) {
                     var $this = this;
 
                     $this.mode = 'edit';
@@ -104,13 +104,7 @@
                     }
                 },
 
-                reset: function (form_ctrl) {
-                    form_ctrl._submit_attempted = false;
-                    form_ctrl.$setPristine();
-                    angular.copy(this.defaults, this.obj);
-                },
-
-                submit: function (form_ctrl) {
+                submit: function(form_ctrl) {
                     var $this = this;
 
                     form_ctrl._submit_attempted = true;
@@ -140,7 +134,7 @@
                     var obj_to_submit = (config.massage_objt) ? config.massage_obj(this.obj) : this.obj;
 
                     if (this.mode == 'new') {
-                        rest.add(entity, obj_to_submit).then(function (data) {
+                        rest.add(entity, obj_to_submit).then(function(data) {
                             notification.add(null, 'Объект создан', 'success');
 
                             if($this.config.after_submit.length) {
@@ -152,16 +146,36 @@
                                 // TODO global config
                                 $location.path('/' + entity + '/' + data.id);
                             }
+
+                            $this.mode = null;
                         }, handle_server_errors);
-                    } else {
+                    } else if(this.mode == 'edit') {
                         rest.update_by_id(entity, this.id, obj_to_submit).then(function (data) {
                             notification.add(null, 'Объект сохранен', 'success');
 
                             $.each($this.config.after_submit, function (k, v) {
                                 v.call($this);
                             });
+
+                            $this.mode = null;
                         }, handle_server_errors);
                     }
+                },
+
+                _reset_validation: function(form_ctrl) {
+                    form_ctrl._submit_attempted = false;
+                    form_ctrl.$setPristine();
+                },
+
+                restart: function(form_ctrl) {
+                    this._reset_validation(form_ctrl);
+                    this.mode = null;
+                    this.obj = {};
+                },
+
+                reset: function(form_ctrl) {
+                    this._reset_validation(form_ctrl);
+                    angular.copy(this.defaults, this.obj);  // TODO 'new' -> defaults, 'edit' -> loaded model
                 }
             };
         };
