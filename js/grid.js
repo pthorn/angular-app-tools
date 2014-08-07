@@ -82,12 +82,16 @@ see also
     <div class="filters">\
         Фильтр:\
         <input class="search" type="text" ng-model="search" ng-show="search_enabled">\
-        <button class="filter-go" ng-show="search_enabled" ng-click="filter_changed()" ng-disabled="!search"><div></div></button>\
+        <button class="filter-go" ng-show="search_enabled" ng-click="filter_changed()" ng-disabled="!search">\
+          <i class="glyphicon glyphicon-search"></i>\
+        </button>\
         <span ng-repeat="filter in filters">\
           <select ng-model="filter.selected" ng-options="opt as opt.label for opt in filter.options" ng-change="filter_changed(filter)">\
           </select>\
         </span>\
-        <button class="filter-reset" ng-show="filters.length || search_enabled" ng-click="filter_reset()"><div></div></button>\
+        <button class="filter-reset" ng-show="filters.length || search_enabled" ng-click="filter_reset()">\
+          <i class="glyphicon glyphicon-remove"></i>\
+        </button>\
     </div>\
     <table class="table table-condensed table-hover"> \
         <thead> \
@@ -103,30 +107,34 @@ see also
             </tr> \
         </tbody> \
     </table> \
-    <div class="page-nav">\
-        <ul class="pagination">\
-            <li ng-class="{disabled: current_page == 1}">\
-                <a class="first" ng-click="first_page_click()">&laquo;</a>\
-            </li>\
-            <li ng-class="{disabled: current_page == 1}">\
-                <a class="prev" ng-click="prev_page_click()">&lt;</a>\
-            </li>\
-            <li ng-repeat="page in pages" ng-class="{active: page == current_page}">\
-              <a ng-click="page_click(page)">{{page}}</a>\
-            </li>\
-            <li ng-class="{disabled: current_page == n_pages}">\
-                <a class="next" ng-click="next_page_click()">&gt;</a>\
-            </li>\
-            <li ng-class="{disabled: current_page == n_pages}">\
-                <a class="last" ng-click="last_page_click()">&raquo;</a>\
-            </li>\
-        </ul>\
-        <span ng-show="n_rows > 0">\
-            Страница {{current_page}}/{{n_pages}}, строки {{first_row}}/{{last_row}} из {{n_rows}}\
-        </span>\
-        <span ng-show="n_rows == 0">\
-            Нет данных.\
-        </span>\
+    <div class="page-nav row">\
+        <div class="col-xs-6">\
+            <ul class="pagination">\
+                <li ng-class="{disabled: current_page == 1}">\
+                    <a class="first" ng-click="first_page_click()">&laquo;</a>\
+                </li>\
+                <li ng-class="{disabled: current_page == 1}">\
+                    <a class="prev" ng-click="prev_page_click()">&lt;</a>\
+                </li>\
+                <li ng-repeat="page in pages" ng-class="{active: page == current_page}">\
+                  <a ng-click="page_click(page)">{{page}}</a>\
+                </li>\
+                <li ng-class="{disabled: current_page == n_pages}">\
+                    <a class="next" ng-click="next_page_click()">&gt;</a>\
+                </li>\
+                <li ng-class="{disabled: current_page == n_pages}">\
+                    <a class="last" ng-click="last_page_click()">&raquo;</a>\
+                </li>\
+            </ul>\
+        </div>\
+        <div class="col-xs-6 info">\
+            <span ng-show="n_rows > 0">\
+                Страница {{current_page}}/{{n_pages}}, строки {{first_row}}/{{last_row}} из {{n_rows}}\
+            </span>\
+            <span ng-show="n_rows == 0">\
+                Нет данных.\
+            </span>\
+        </div>\
     </div>\
 </div>',
 

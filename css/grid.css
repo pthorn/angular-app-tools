@@ -1,7 +1,15 @@
 
+.clickable {
+    cursor: pointer;
+}
+
 div.aat-grid {
 
 }
+
+    div.aat-grid div.filters {
+        margin-bottom: 8px;
+    }
 
     div.aat-grid table.table {
         margin-bottom: 0;
@@ -47,4 +55,8 @@ div.aat-grid {
 
     div.aat-grid ul.pagination a {
         cursor: pointer;
+    }
+
+    div.aat-grid div.page-nav div.info {
+        padding: 20px 0;
     }
