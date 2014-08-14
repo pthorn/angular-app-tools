@@ -1,4 +1,4 @@
-/**
+**
    data grid
 
 options
@@ -54,6 +54,8 @@ options
 
 TODO
 
+    - initial filters (like show customers for current user only)
+    - test what happens when current page happens to be past the data set (rows have been deleted)
     - key: dots in key ('contracts.id') - ?; used both for sorting and as an index into row (row[col.key])
     - date format
     - column width?
@@ -165,6 +167,11 @@ see also
                         $scope.loading = false;
                         $scope.error = true;
                     });
+                };
+
+                this.reload = function() {
+                    $scope.current_page = 1;
+                    this.load();
                 };
             },
 
