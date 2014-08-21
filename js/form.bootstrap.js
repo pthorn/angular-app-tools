@@ -30,7 +30,7 @@
                 };
 
                 // update chosen when options change
-                var re = /in +(\w+)/;  // "i.id as i.name for i in clients" -> "clients"
+                var re = / +in +(\w+)/;  // "i.id as i.name for i in clients" -> "clients"
                 var expr_to_watch = attrs.ngOptions.match(re)[1];
                 scope.$watch(expr_to_watch, model_ctrl.$render);
             }
