@@ -30,154 +30,165 @@
      *
      * TODO disable submit button with no changes?
      */
-    form.factory('form_handler', function ($location, rest, notification) {
+    form.service('form_handler', function($location, rest, notification) {
 
-        // TODO new function()?
-        return function(entity, config) {
+        var config_defaults = {
+            after_load: null,
 
-            config = angular.extend({
-                after_load: [],
-                massage_obj: null,
-                before_submit: [],
-                after_submit: []
-            }, config || {});
+            massage_obj: null,
 
-            if (typeof config.after_load == 'function') {
-                config.after_load = [config.after_load];
+            on_invalid: function() {
+                notification.add(null, 'Форма содержит ошибки', 'warning');
+            },
+
+            on_server_invalid: function(data) {
+                notification.add(null, 'Форма содержит ошибки', 'warning');
+            },
+
+            before_submit: null,
+
+            after_create: function(data) {
+                notification.add(null, 'Объект создан', 'success');
+                $location.path('/' + this.entity + '/' + data.id);  // go to edit form
+            },
+
+            after_update: function(data) {
+                notification.add(null, 'Объект сохранен', 'success');
             }
-            if (typeof config.before_submit == 'function') {
-                config.before_submit = [config.before_submit];
-            }
-            if (typeof config.after_submit == 'function') {
-                config.after_submit = [config.after_submit];
-            }
+        };
 
-            return {
-                config: config,
-                mode: null,
-                id: null,
-                obj: {},
-                defaults: null,
+        var global_config = angular.extend({}, config_defaults);  // defaults in case configure() is never called
 
-                load: function (id, defaults) {
-                    if (id === undefined || id === null) {
-                        this.load_new(defaults);
-                    } else {
-                        this.load_edit(id);
-                    }
-                },
+        this.configure = function(config) {
+            global_config = angular.extend({}, config_defaults, config || {});
+        };
 
-                load_new: function (defaults) {
-                    var $this = this;
+        this.Handler = function(entity, config) {
 
-                    $this.mode = 'new';
-                    $this.defaults = defaults;
-                    angular.copy(defaults, $this.obj);
+            this.config = angular.extend({}, global_config, config || {});
 
-                    $.each($this.config.after_load, function (k, v) {
-                        v.call($this);
-                    });
-                },
+            this.entity = entity;
+            this.mode = null;
+            this.id = null;
+            this.obj = {};
+            this.defaults = null;
 
-                load_edit: function(id) {
-                    var $this = this;
-
-                    $this.mode = 'edit';
-                    $this.id = id;
-
-                    rest.get_by_id(entity, id).then(function (data) {
-                        $this.obj = data.data;
-                        $.each($this.config.after_load, function (k, v) {
-                            v.call($this);
-                        });
-                    });
-                },
-
-                switch_to_edit_mode: function (id, set_id) {
-                    this.mode = 'edit';
-                    this.id = id;
-
-                    if (set_id) {
-                        set_id(this.obj, id);
-                    } else {
-                        this.obj.id = id;  // assumes that the id field in the object is called 'id'
-                    }
-                },
-
-                submit: function(form_ctrl) {
-                    var $this = this;
-
-                    form_ctrl._submit_attempted = true;
-                    form_ctrl._clear_server_errors();
-
-                    $.each($this.config.before_submit, function (k, v) {
-                        v.call($this);
-                    });
-
-                    if (form_ctrl.$invalid) {
-                        notification.add(null, 'Форма содержит ошибки', 'warning');
-                        //console.log('form invalid, form.$error:', form_ctrl.$error);
-                        //console.log('form invalid, form.id.$error:', form_ctrl.id.$error, 'form.id:', form_ctrl.id);
-                        return;
-                    }
-
-                    var handle_server_errors = function (data) {
-                        if (data.status == 'invalid') {
-                            notification.add(null, 'Форма содержит ошибки', 'warning');
-                            form_ctrl._add_server_errors(data.errors);
-                        } else {
-                            // TODO unexpected error
-                            console.error('unexpected submit error:', data);
-                        }
-                    };
-
-                    var obj_to_submit = (config.massage_objt) ? config.massage_obj(this.obj) : this.obj;
-
-                    if (this.mode == 'new') {
-                        rest.add(entity, obj_to_submit).then(function(data) {
-                            notification.add(null, 'Объект создан', 'success');
-
-                            if($this.config.after_submit.length) {
-                                $.each($this.config.after_submit, function (k, v) {
-                                    v.call($this, data);
-                                });
-                            } else {
-                                // show the edit form (possibly with detail view)
-                                // TODO global config
-                                $location.path('/' + entity + '/' + data.id);
-                            }
-
-                            $this.mode = null;
-                        }, handle_server_errors);
-                    } else if(this.mode == 'edit') {
-                        rest.update_by_id(entity, this.id, obj_to_submit).then(function (data) {
-                            notification.add(null, 'Объект сохранен', 'success');
-
-                            $.each($this.config.after_submit, function (k, v) {
-                                v.call($this);
-                            });
-
-                            $this.mode = null;
-                        }, handle_server_errors);
-                    }
-                },
-
-                _reset_validation: function(form_ctrl) {
-                    form_ctrl._submit_attempted = false;
-                    form_ctrl.$setPristine();
-                },
-
-                restart: function(form_ctrl) {
-                    this._reset_validation(form_ctrl);
-                    this.mode = null;
-                    this.obj = {};
-                },
-
-                reset: function(form_ctrl) {
-                    this._reset_validation(form_ctrl);
-                    angular.copy(this.defaults, this.obj);  // TODO 'new' -> defaults, 'edit' -> loaded model
+            this.load = function(id, defaults) {
+                if (id === undefined || id === null) {
+                    this.load_new(defaults);
+                } else {
+                    this.load_edit(id);
                 }
             };
+
+            this.load_new = function(defaults) {
+                var $this = this;
+
+                $this.mode = 'new';
+                $this.defaults = defaults;
+                angular.copy(defaults, $this.obj);
+
+                if(typeof $this.config.after_load == 'function') {
+                    $this.config.after_load.call($this);
+                }
+            };
+
+            this.load_edit = function(id) {
+                var $this = this;
+
+                $this.mode = 'edit';
+                $this.id = id;
+
+                rest.get_by_id(entity, id).then(function(data) {
+                    $this.obj = data.data;
+                    if(typeof $this.config.after_load == 'function') {
+                        $this.config.after_load.call($this);
+                    }
+                });
+            };
+
+            this.switch_to_edit_mode = function(id, set_id) {
+                this.mode = 'edit';
+                this.id = id;
+
+                if(set_id) {
+                    set_id(this.obj, id);
+                } else {
+                    this.obj.id = id;  // assumes that the id field in the object is called 'id'
+                }
+            };
+
+            this.submit = function(form_ctrl) {
+                var $this = this;
+
+                form_ctrl._submit_attempted = true;
+                form_ctrl._clear_server_errors();
+
+                if(typeof $this.config.before_submit == 'function') {
+                    $this.config.before_submit.call($this);
+                }
+
+                if(form_ctrl.$invalid) {
+                    console.log('form invalid, form.$error:', form_ctrl.$error);
+                    if(typeof $this.config.on_invalid == 'function') {
+                        $this.config.on_invalid.call($this, form_ctrl);
+                    }
+                    return;
+                }
+
+                var handle_server_errors = function(data) {
+                    if(data.status == 'invalid') {
+                        console.log('form invalid (server validation), data.errors:', data.errors);
+                        if(typeof $this.config.on_server_invalid == 'function') {
+                            $this.config.on_server_invalid.call($this, data, form_ctrl);
+                        }
+                        form_ctrl._add_server_errors(data.errors);
+                    } else {
+                        // TODO unexpected error
+                        console.error('unexpected submit error:', data);
+                    }
+                };
+
+                var obj_to_submit = (typeof $this.config.massage_obj == 'function') ? $this.config.massage_obj(this.obj) : this.obj;
+
+                if (this.mode == 'new') {
+                    rest.add(entity, obj_to_submit).then(function(data) {
+                        if(typeof $this.config.after_create == 'function') {
+                            $this.config.after_create.call($this, data);
+                        }
+
+                        // TODO
+                        if($this.mode == 'new') {
+                            $this.mode = null;
+                        }
+                    }, handle_server_errors);
+
+                } else if(this.mode == 'edit') {
+                    rest.update_by_id(entity, this.id, obj_to_submit).then(function(data) {
+                        if(typeof $this.config.after_update == 'function') {
+                            $this.config.after_update.call($this, data);
+                        }
+                    }, handle_server_errors);
+                }
+            };
+
+            var _reset_validation = function(form_ctrl) {
+                form_ctrl._submit_attempted = false;
+                form_ctrl.$setPristine();
+            };
+
+            this.restart = function(form_ctrl) {
+                _reset_validation(form_ctrl);
+                this.mode = null;
+                this.obj = {};
+            };
+
+            this.reset = function(form_ctrl) {
+                _reset_validation(form_ctrl);
+                angular.copy(this.defaults, this.obj);  // TODO 'new' -> defaults, 'edit' -> loaded model
+            };
+
+            return this;
         };
     });
 
