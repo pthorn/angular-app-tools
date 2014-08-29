@@ -39,5 +39,11 @@ div.aat-image-list {
                     div.aat-image-list li > div a:hover span.glyphicon,
                     div.aat-image-list li > div a:active span.glyphicon
                     {
-                        color: #f88;
+                        color: #aaf;
+                    }
+
+                    div.aat-image-list li > div a:hover span.glyphicon.glyphicon-remove,
+                    div.aat-image-list li > div a:active span.glyphicon.glyphicon-remove
+                    {
+                        color: red;
                     }
