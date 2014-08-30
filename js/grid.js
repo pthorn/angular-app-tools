@@ -212,6 +212,14 @@ see also
                 }
 
                 //
+                // place stuff into scope so it is accessible in expressions
+                //
+
+                if(window.aat) {
+                    $scope.aat = aat;
+                }
+
+                //
                 // pagination
                 //
 
