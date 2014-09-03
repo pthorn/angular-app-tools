@@ -68,6 +68,7 @@
                     form_ctrl  = ctrls[1];
 
                 var options = angular.extend({
+                    model_format: 'YYYY-MM-DD',  // moment format
                     m_format:    'DD.MM.YYYY',
                     dp_format:   'dd.mm.yyyy',
                     range_start: null,
@@ -108,7 +109,7 @@
                         return val;  // empty
                     }
 
-                    var val_as_date = moment(val); // model value is an ISO string
+                    var val_as_date = moment(val, options.model_format);
 
                     // note: model value is a string, not a Date, so moment(val)
                     //console.log('format:', val, val ? moment(val).format(options.m_format) : val);
@@ -148,7 +149,7 @@
                     }
 
                     //console.log('parse:', val, val ? moment(val, options.m_format).toISOString() : val);
-                    return val_as_date.toISOString();
+                    return val_as_date.format(options.model_format);
                 });
             }
         }
