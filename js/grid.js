@@ -88,7 +88,7 @@ see also
           <i class="glyphicon glyphicon-search"></i>\
         </button>\
         <span ng-repeat="filter in filters">\
-          <select ng-model="filter.selected" ng-options="opt as opt.label for opt in filter.options" ng-change="filter_changed(filter)">\
+          <select ng-model="filter.selected" ng-options="opt as opt.label for opt in filter.options" ng-change="filter_changed()">\
           </select>\
         </span>\
         <button class="filter-reset" ng-show="filters.length || search_enabled" ng-click="filter_reset()">\
@@ -173,6 +173,10 @@ see also
                     $scope.current_page = 1;
                     this.load();
                 };
+
+                this.set_external_filters = function(filters) {
+                    $scope.external_filters = filters;
+                };
             },
 
             link: function($scope, element, attrs, controller) {
@@ -192,7 +196,8 @@ see also
                     order_asc_class: 'asc',
                     order_desc_class: 'desc',
                     search_enabled: true,
-                    filters: []
+                    filters: [],
+                    external_filters: {}
                 }, $scope.$eval(attrs.options));
 
                 $scope.columns = options.columns;
@@ -332,8 +337,12 @@ see also
 
                 $scope.search = '';
                 $scope.search_enabled = options.search_enabled;
-                $scope.filters = [];  // [{key: '', selected: <option>, options: [{val: x, label: x}]}, ...]
-                $scope.selected_filters = {};  // {key: 'val', ...}, passed to rest.get_list()
+                // [{key: '', selected: <option>, options: [{val: x, label: x}]}, ...]
+                $scope.filters = [];
+                // {key: 'val', ...}, controlled by options.external_filters and controller methods
+                $scope.external_filters = options.external_filters;
+                // {key: 'val', ...}, passed to rest.get_list()
+                $scope.selected_filters = {};
 
                 // compute $scope.filters from options.filters
                 $.each(options.filters, function(i, filter_spec) {
@@ -375,8 +384,8 @@ see also
                         $scope.search = $.trim(search);
                 });
 
-                $scope.filter_changed = function(changed_filter) {
-                    $scope.selected_filters = {};
+                $scope.filter_changed = function() {
+                    $scope.selected_filters = angular.copy($scope.external_filters);
                     $.each($scope.filters, function(i, filter) {
                         if(filter.selected.val !== null) {
                             $scope.selected_filters[filter.key] = filter.selected.val;  // TODO op
@@ -401,6 +410,9 @@ see also
                 if(options.add_to_scope) {
                     options.add_to_scope($scope);
                 }
+
+                $scope.filter_changed();
+                console.log('go:', $scope.external_filters, $scope.selected_filters);
 
                 controller.load();
             }
