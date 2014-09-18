@@ -442,10 +442,10 @@
       <img ng-src="{{thumb_src(img)}}">\
       <div>\
         <a ng-show="options.del_button" ng-click="del(img)" title="Удалить">\
-          <span class="glyphicon glyphicon-remove"></span>\
+          <span class="glyphicon glyphicon-remove gi gi-remove"></span>\
         </a>\
         <a ng-show="options.orig_button" ng-click="open(img)" title="Открыть оригинал">\
-          <span class="glyphicon glyphicon-new-window"></span>\
+          <span class="glyphicon glyphicon-new-window gi gi-new_window"></span>\
         </a>\
       </div>\
       <p>{{img.caption}}</p>\
