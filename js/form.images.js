@@ -398,7 +398,7 @@
             this.load = function() {
                 $scope.loading = true;
 
-                var filters = $scope.options.filters;
+                var filters = $scope.options.list_filters;
                 if(typeof filters === 'function') {
                     filters = filters();  // TODO this / parameters
                 }
@@ -441,10 +441,10 @@
     <li class="thumbnail" ng-repeat="img in images">\
       <img ng-src="{{thumb_src(img)}}">\
       <div>\
-        <a ng-click="del(img)" title="Удалить">\
+        <a ng-show="options.del_button" ng-click="del(img)" title="Удалить">\
           <span class="glyphicon glyphicon-remove"></span>\
         </a>\
-        <a ng-click="open(img)" title="Открыть оригинал">\
+        <a ng-show="options.orig_button" ng-click="open(img)" title="Открыть оригинал">\
           <span class="glyphicon glyphicon-new-window"></span>\
         </a>\
       </div>\
@@ -458,23 +458,29 @@
             link: function($scope, element, attrs, controller) {
 
                 $scope.options = $.extend({
-                    url_prefix: '',               // for <img src="">
-                    get_orig_filename: function(img) {
-                        return img.id + '.' +img.ext;
+                    entity: '',               // for update & delete operations
+
+                    // gallery options
+                    list_filters: {},         // for the get list REST request
+                    url_prefix: '',           // for <img src="">
+                    list_variant: 'thumb',    // <id>-thumb.jpg
+                    link_variant: '',         // <id>.jpg
+                    del_button: true,         // show delete button
+                    orig_button: true,        // show "view original" button
+
+                    get_filename: function(img, variant) {
+                        return img.id + (variant ? '-' + variant : '') + '.' + img.ext;
                     },
-                    get_thumb_filename: function(img) {
-                        return img.id + '-thumb.' +img.ext;
-                    },
+
+                    // upload options
                     upload_url: '',
                     file_param: 'file',
-                    upload_params: {},
-                    entity: '',                    // for update & delete operations
-                    filters: {}
+                    upload_params: {}
                 }, $scope.$eval(attrs.options));
 
                 $scope.thumb_src = function(img) {
                     // TODO ensure slash between prefix & filename
-                    return $scope.options.url_prefix + $scope.options.get_thumb_filename(img);
+                    return $scope.options.url_prefix + $scope.options.get_filename(img, $scope.options.list_variant);
                 };
 
                 $scope.del = function(img) {
@@ -483,19 +489,19 @@
 
                 $scope.open = function(img) {
                     // TODO ensure slash between prefix & filename
-                    window.open($scope.options.url_prefix + $scope.options.get_orig_filename(img), '_blank');
+                    window.open($scope.options.url_prefix + $scope.options.get_filename(img, $scope.options.link_variant), '_blank');
                 };
 
                 var file_input = element.find('input[type="file"]');
 
                 file_input.on('change', function(e) {
                     e.preventDefault();
+
                     upload_service.add_files(this.files, {
                         upload_url: $scope.options.upload_url,
                         file_param: $scope.options.file_param,
                         upload_params: $scope.options.upload_params
                     }).then(function() {
-                        console.log('THEN!!!');
                         controller.load();
                     });
                 });
