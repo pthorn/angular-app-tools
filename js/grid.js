@@ -85,14 +85,14 @@ see also
         Фильтр:\
         <input class="search" type="text" ng-model="search" ng-show="search_enabled">\
         <button class="filter-go" ng-show="search_enabled" ng-click="filter_changed()" ng-disabled="!search">\
-          <i class="glyphicon glyphicon-search"></i>\
+          <i class="glyphicon glyphicon-search gi gi-search"></i>\
         </button>\
         <span ng-repeat="filter in filters">\
           <select ng-model="filter.selected" ng-options="opt as opt.label for opt in filter.options" ng-change="filter_changed()">\
           </select>\
         </span>\
         <button class="filter-reset" ng-show="filters.length || search_enabled" ng-click="filter_reset()">\
-          <i class="glyphicon glyphicon-remove"></i>\
+          <i class="glyphicon glyphicon-remove gi gi-remove"></i>\
         </button>\
     </div>\
     <table class="table table-condensed table-hover"> \
