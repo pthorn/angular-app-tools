@@ -9,7 +9,7 @@
      * <select ng-options="i.id as i.name for i in clients" f-chosen>
      * http://harvesthq.github.io/chosen/options.html
      */
-    m_form_bootstrap.directive('fChosen', function() {
+    m_form_bootstrap.directive('fChosen', ['$timeout', function($timeout) {
         return {
             restrict: 'A',
             require: 'ngModel',
@@ -23,19 +23,25 @@
                     no_results_text: 'Нет совпадений'
                 });
 
-                model_ctrl.$render = function() {
-                    setTimeout(function() {
+                //update chosen when model changes
+                scope.$watch(attrs.ngModel, function() {
+                    $timeout(function () {
                         element.trigger('chosen:updated');
-                    }, 0);
-                };
+                    });
+                });
 
                 // update chosen when options change
+                // https://github.com/harvesthq/chosen/issues/2159
                 var re = / +in +(\w+)/;  // "i.id as i.name for i in clients" -> "clients"
                 var expr_to_watch = attrs.ngOptions.match(re)[1];
-                scope.$watch(expr_to_watch, model_ctrl.$render);
+                scope.$watch(expr_to_watch, function() {
+                    $timeout(function () {
+                        element.trigger('chosen:updated');
+                    });
+                });
             }
         };
-    });
+    }]);
 
 
     /**
